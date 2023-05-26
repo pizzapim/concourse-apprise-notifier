@@ -14,8 +14,8 @@ payload=$(mktemp /tmp/resource-in.XXXXXX)
 cat > "${payload}" <&0
 
 apprise_host="$(jq -r '.source.host' < "${payload}")"
+apprise_key="$(jq -r '.source.key' < "${payload}")"
 
-apprise_key="$(jq -r '.params.key' < "${payload}")"
 alert_body="$(jq -r '.params.body' < "${payload}")"
 alert_title="$(jq -r '.params.title // null' < "${payload}")"
 alert_type="$(jq -r '.params.type // null' < "${payload}")"

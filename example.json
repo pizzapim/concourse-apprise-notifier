@@ -1,0 +1,12 @@
+{
+	"params": {
+		"key": "concourse",
+		"body": "hoi",
+		"title": "Titeltje!",
+		"type": "warning",
+		"format": "text"
+	},
+	"source": {
+		"host": "https://apprise.pim.kunis.nl:444"
+	}
+}

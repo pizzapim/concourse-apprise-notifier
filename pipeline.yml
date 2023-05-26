@@ -1,0 +1,79 @@
+---
+resources:
+  - name: repo
+    type: git
+    source:
+      uri: https://git.pim.kunis.nl/pim/concourse-apprise-notifier.git
+    icon: git
+  - name: registry-image
+    type: registry-image
+    source:
+      repository: git.pim.kunis.nl/pim/concourse-apprise-notifier
+      username: pim
+      password: ((api_key))
+    icon: docker
+
+jobs:
+  - name: build-and-publish-image
+    plan:
+      - get: repo
+        trigger: true
+      - task: build-image
+        privileged: true
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source:
+              repository: concourse/oci-build-task
+          inputs:
+            - name: repo
+          outputs:
+            - name: image
+          params:
+            DOCKERFILE: repo/Dockerfile
+          run:
+            path: sh
+            args:
+              - -exc 
+              - |
+                build
+                ls image
+                cat image/digest | cut -d ":" -f 2- > image/tag
+      - task: get-old-packages
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source:
+              repository: badouralix/curl-jq
+          outputs:
+            - name: old-packages
+          run:
+            path: sh
+            args:
+              - -exc
+              - |
+                ls -lash
+                curl -X 'GET' 'https://git.pim.kunis.nl/api/v1/packages/pim?type=container&q=concourse-apprise-notifier' -H 'accept: application/json' | jq -rc 'map(.version) | .[]' > old-packages/packages.txt
+                cat old-packages/packages.txt
+      - task: delete-old-packages
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source:
+              repository: badouralix/curl-jq
+          inputs:
+            - name: old-packages
+          run:
+            path: sh
+            args:
+              - -exc
+              - |
+                ls -lash
+                while read pkg; do curl -X 'DELETE' "https://git.pim.kunis.nl/api/v1/packages/pim/container/concourse-apprise-notifier/$pkg?token=((api_key))" -H 'accept: application/json'; done < old-packages/packages.txt
+      - put: registry-image
+        params:
+          image: image/image.tar
+          additional_tags: image/tag

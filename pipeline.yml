@@ -11,7 +11,7 @@ resources:
       repository: git.pim.kunis.nl/pim/concourse-apprise-notifier
       username: pim
       password: ((api_key))
-      tag: ((image_version))
+      tag: "((image_version))"
     icon: docker
 
 jobs:
@@ -78,4 +78,3 @@ jobs:
       - put: registry-image
         params:
           image: image/image.tar
-          additional_tags: 'latest ((image_version))'

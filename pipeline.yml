@@ -11,8 +11,18 @@ resources:
       repository: git.pim.kunis.nl/pim/concourse-apprise-notifier
       username: pim
       password: ((api_key))
-      tag: ((image_version))
+      tag: stable
     icon: docker
+  - name: version
+    type: semver
+    source:
+      driver: git
+      initial_version: "1.1.0"
+      uri: ssh://git@git.pim.kunis.nl:56287/pim/concourse-apprise-notifier.git
+      branch: version
+      file: version
+      private_key: {{private_key}}
+    icon: numeric
 
 jobs:
   - name: build-and-publish-image
@@ -41,6 +51,13 @@ jobs:
               - |
                 build
                 ls image
+      - get: version
+        params:
+          bump: patch
       - put: registry-image
         params:
           image: image/image.tar
+          additional_tags: version/version
+      - put: version
+        params:
+          file: version/version

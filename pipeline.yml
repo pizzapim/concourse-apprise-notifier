@@ -11,7 +11,7 @@ resources:
       repository: git.pim.kunis.nl/pim/concourse-apprise-notifier
       username: pim
       password: ((api_key))
-      tag: "((image_version))"
+      tag: ((image_version))
     icon: docker
 
 jobs:
@@ -33,6 +33,7 @@ jobs:
             - name: image
           params:
             DOCKERFILE: repo/Dockerfile
+            LABELS_FILE: repo/labels
           run:
             path: sh
             args:
@@ -40,41 +41,6 @@ jobs:
               - |
                 build
                 ls image
-                cat image/digest | cut -d ":" -f 2- > image/tag
-      # - task: get-old-packages
-      #   config:
-      #     platform: linux
-      #     image_resource:
-      #       type: registry-image
-      #       source:
-      #         repository: badouralix/curl-jq
-      #     outputs:
-      #       - name: old-packages
-      #     run:
-      #       path: sh
-      #       args:
-      #         - -exc
-      #         - |
-      #           ls -lash
-      #           curl -X 'GET' 'https://git.pim.kunis.nl/api/v1/packages/pim/container/concourse-apprise-notifier/((image_version))'
-      #           curl -X 'GET' 'https://git.pim.kunis.nl/api/v1/packages/pim?type=container&q=concourse-apprise-notifier' -H 'accept: application/json' | jq -rc 'map(.version) | .[]' > old-packages/packages.txt
-      #           cat old-packages/packages.txt
-      # - task: delete-old-packages
-      #   config:
-      #     platform: linux
-      #     image_resource:
-      #       type: registry-image
-      #       source:
-      #         repository: badouralix/curl-jq
-      #     inputs:
-      #       - name: old-packages
-      #     run:
-      #       path: sh
-      #       args:
-      #         - -exc
-      #         - |
-      #           ls -lash
-      #           while read pkg; do curl -X 'DELETE' "https://git.pim.kunis.nl/api/v1/packages/pim/container/concourse-apprise-notifier/$pkg?token=((api_key))" -H 'accept: application/json'; done < old-packages/packages.txt
       - put: registry-image
         params:
           image: image/image.tar

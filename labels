@@ -1,0 +1,4 @@
+org.opencontainers.image.authors=Pim Kunis
+org.opencontainers.image.source=https://git.pim.kunis.nl/pim/concourse-apprise-notifier/
+org.opencontainers.image.documentation=https://git.pim.kunis.nl/pim/concourse-apprise-notifier/src/branch/master/README.md
+org.opencontainers.image.description=Concourse resource type to send Apprise notifications.

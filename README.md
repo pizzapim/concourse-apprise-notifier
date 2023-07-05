@@ -12,7 +12,7 @@ resource_types:
 - name: apprise
   type: registry-image
   source:
-    repository: git.pim.kunis.nl/pim/concourse-apprise-notifier
+    repository: git.kun.is/pim/concourse-apprise-notifier
 ```
 
 ## Source Configuration
